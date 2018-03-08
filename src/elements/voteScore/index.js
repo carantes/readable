@@ -4,32 +4,23 @@ import PropTypes from 'prop-types';
 class VoteScore extends Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            counter: props.votes,
-        };
-
         this.voteUp = this.voteUp.bind(this);
         this.voteDown = this.voteDown.bind(this);
     }
 
     voteUp() {
-        this.setState(prevState => ({
-            counter: prevState.counter + 1,
-        }));
+        this.props.onUpdate(this.props.id, 'upVote');
     }
 
     voteDown() {
-        this.setState(prevState => ({
-            counter: prevState.counter - 1,
-        }));
+        this.props.onUpdate(this.props.id, 'downVote');
     }
 
     render() {
         return (
             <div>
                 <div><button onClick={this.voteDown}>-</button></div>
-                <div>{this.state.counter}</div>
+                <div>{this.props.count}</div>
                 <div><button onClick={this.voteUp}>+</button></div>
             </div>
         );
@@ -37,10 +28,12 @@ class VoteScore extends Component {
 }
 
 VoteScore.propTypes = {
-    votes: PropTypes.number,
+    id: PropTypes.string.isRequired,
+    count: PropTypes.number,
+    onUpdate: PropTypes.func.isRequired,
 };
 VoteScore.defaultProps = {
-    votes: 0,
+    count: 0,
 };
 
 export default VoteScore;

@@ -3,20 +3,20 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Post from '../../elements/post';
 
-import { fetchPosts } from '../../actions/posts';
+import { fetchGetPosts, fetchUpdatePostVotes, fetchDeletePost } from '../../actions/posts';
 
 class PostList extends Component {
     componentDidMount() {
-        this.props.loadPostsInitialData(this.props.match.params.category);
+        this.props.loadPosts(this.props.match.params.category);
     }
 
     render() {
-        const { posts } = this.props;
+        const { posts, updateVote, deletePost } = this.props;
         return (
             <div className="App">
                 <ul>
                     { posts.map(post => (
-                        <li key={post.id}><Post {...post} /></li>
+                        <li key={post.id}><Post {...post} onUpdateVoteScore={updateVote} onDeletePost={deletePost} /></li>
                     )) }
                 </ul>
             </div>
@@ -27,6 +27,9 @@ class PostList extends Component {
 PostList.propTypes = {
     match: PropTypes.object, // eslint-disable-line react/forbid-prop-types
     posts: PropTypes.array, // eslint-disable-line react/forbid-prop-types
+    loadPosts: PropTypes.func.isRequired,
+    updateVote: PropTypes.func.isRequired,
+    deletePost: PropTypes.func.isRequired,
 };
 
 PostList.defaultProps = {
@@ -35,8 +38,14 @@ PostList.defaultProps = {
 };
 
 const mapDispatchToProps = dispatch => ({
-    loadPostsInitialData(category) {
-        dispatch(fetchPosts(category));
+    loadPosts(category) {
+        dispatch(fetchGetPosts(category));
+    },
+    updateVote(postId, option) {
+        dispatch(fetchUpdatePostVotes(postId, option));
+    },
+    deletePost(postId) {
+        dispatch(fetchDeletePost(postId));
     },
 });
 

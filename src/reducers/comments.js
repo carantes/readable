@@ -2,7 +2,7 @@ import {
     ADD_COMMENT,
     EDIT_COMMENT,
     DELETE_COMMENT,
-} from '../actions/comments';
+} from '../actions/types';
 
 function comments(state = [], action) {
     const { payload } = action;

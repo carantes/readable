@@ -1,7 +1,8 @@
-export const REQUEST_CATEGORIES = 'REQUEST_CATEGORIES';
-export const RECEIVE_CATEGORIES = 'RECEIVE_CATEGORIES';
+import { API_ENDPOINT, REQUEST_CATEGORIES, RECEIVE_CATEGORIES } from './types';
 
-const CATEGORY_ENDPOINT = 'http://localhost:3001/categories';
+function getCategoryEndpoint() {
+    return `${API_ENDPOINT}/categories`;
+}
 
 function requestCategories() {
     return {
@@ -18,12 +19,11 @@ function receiveCategories({ categories }) {
     };
 }
 
-export function fetchCategories() {
+export default function fetchCategories() {
     return (dispatch) => {
         dispatch(requestCategories());
-        return fetch(CATEGORY_ENDPOINT, { method: 'GET', headers: { authorization: 'readable' } })
+        return fetch(getCategoryEndpoint(), { method: 'GET', headers: { authorization: 'readable' } })
             .then(response => response.json())
             .then(json => dispatch(receiveCategories(json)));
     };
 }
-

@@ -4,7 +4,7 @@ import { createLogger } from 'redux-logger';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import reducer from './reducers';
 
-import { fetchCategories } from './actions/categories';
+import fetchCategories from './actions/categories';
 
 const loggerMiddleware = createLogger();
 

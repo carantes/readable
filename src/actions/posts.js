@@ -1,9 +1,21 @@
-export const ADD_POST = 'ADD_POST';
-export const EDIT_POST = 'EDIT_POST';
-export const DELETE_POST = 'DELETE_POST';
-export const RECEIVE_POSTS = 'RECEIVE_POSTS';
+import uuidv1 from 'uuid/v1';
 
-const REQUEST_POSTS = 'REQUEST_POSTS';
+import {
+    API_ENDPOINT,
+    REQUEST_POSTS,
+    RECEIVE_POSTS,
+    UPDATE_POST_VOTE_COUNT,
+    ADD_POST, EDIT_POST,
+    DELETE_POST,
+} from './types';
+
+function getPostListEndpoint(category = '') {
+    return category === '' ? `${API_ENDPOINT}/posts` : `${API_ENDPOINT}/${category}/posts`;
+}
+
+function getPostEndpoint(id = '') {
+    return `${API_ENDPOINT}/posts/${id}`;
+}
 
 function requestPosts(category) {
     return {
@@ -20,24 +32,28 @@ function receivePosts(posts) {
     };
 }
 
-function getPostsEndpoint(category) {
-    const POSTS_BASE_ENDPOINT = 'http://localhost:3001';
-    return category ? `${POSTS_BASE_ENDPOINT}/${category}/posts` : `${POSTS_BASE_ENDPOINT}/posts`;
+function updatePostVoteCount(id, option) {
+    return {
+        type: UPDATE_POST_VOTE_COUNT,
+        id,
+        option,
+        receivedAt: Date.now(),
+    };
 }
 
-export function fetchPosts(category) {
+export function fetchGetPosts(category) {
     return (dispatch) => {
         dispatch(requestPosts(category));
-        return fetch(getPostsEndpoint(category), { method: 'GET', headers: { authorization: 'readable' } })
+        return fetch(getPostListEndpoint(category), { method: 'GET', headers: { authorization: 'readable' } })
             .then(response => response.json())
             .then(json => dispatch(receivePosts(json)));
     };
 }
 
-export function addPost({ post }) {
+export function addPost(post) {
     return {
         type: ADD_POST,
-        payload: post,
+        post,
     };
 }
 
@@ -51,9 +67,45 @@ export function editPost({ id, newPost }) {
     };
 }
 
-export function deletePost({ id }) {
+export function deletePost(id) {
     return {
         type: DELETE_POST,
-        payload: id,
+        id,
+    };
+}
+
+export function fetchUpdatePostVotes(postId, option) {
+    const options = { method: 'POST', headers: { authorization: 'readable' }, body: { option } };
+    return dispatch =>
+        fetch(getPostEndpoint(postId), options)
+            .then(response => response.json())
+            .then(json => dispatch(updatePostVoteCount(postId, option)));
+}
+
+export function fetchDeletePost(postId) {
+    const options = { method: 'DELETE', headers: { authorization: 'readable' } };
+    return dispatch =>
+        fetch(getPostEndpoint(postId), options)
+            .then(response => response.json())
+            .then(json => dispatch(deletePost(postId)));
+}
+
+export function fetchPostPost(post) {
+    return (dispatch) => {
+        const options = {
+            method: 'POST',
+            headers: { authorization: 'readable' },
+            body: {
+                id: uuidv1(),
+                timestamp: Date.now(),
+                title: post.title,
+                body: post.body,
+                author: post.author,
+                category: post.category,
+            },
+        };
+        fetch(getPostEndpoint(), options)
+            .then(response => response.json())
+            .then(json => dispatch(addPost(json)));
     };
 }
