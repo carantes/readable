@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import VoteScore from '../voteScore';
 import ActionMenu from '../actionMenu';
@@ -18,7 +19,7 @@ const Post = ({
         <div><VoteScore id={id} count={voteScore} onUpdate={onUpdateVoteScore} /></div>
         <div>{author}</div>
         <div>
-            <div>{title}&nbsp;({category})</div>
+            <div><Link to={`/post/${id}`} >{title}&nbsp;({category})</Link></div>
             <div>{body}</div>
             <div><ActionMenu id={id} comments={commentCount} onDelete={onDeletePost} /></div>
         </div>

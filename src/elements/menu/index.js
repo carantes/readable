@@ -18,7 +18,7 @@ const Menu = ({ categories }) => (
                 </li>
             ))
         }
-        <li><Link to="/create">New Post</Link></li>
+        <li><Link to="/post/create" >New Post</Link></li>
     </ul>
 );
 

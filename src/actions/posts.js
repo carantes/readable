@@ -90,19 +90,25 @@ export function fetchDeletePost(postId) {
             .then(json => dispatch(deletePost(postId)));
 }
 
+export function fetchGetPost(postId) {
+    return fetch(getPostEndpoint(postId), { method: 'GET', headers: { authorization: 'readable' } })
+        .then(response => response.json());
+}
+
 export function fetchPostPost(post) {
     return (dispatch) => {
+        const body = {
+            id: uuidv1(),
+            timestamp: Date.now(),
+            title: post.title,
+            body: post.body,
+            author: post.author,
+            category: post.category,
+        };
         const options = {
             method: 'POST',
             headers: { authorization: 'readable' },
-            body: {
-                id: uuidv1(),
-                timestamp: Date.now(),
-                title: post.title,
-                body: post.body,
-                author: post.author,
-                category: post.category,
-            },
+            body,
         };
         fetch(getPostEndpoint(), options)
             .then(response => response.json())

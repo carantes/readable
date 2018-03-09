@@ -1,17 +1,18 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Menu from './elements/menu';
 import PostList from './pages/postList';
-import PostCreate from './pages/postCreate';
+import PostView from './pages/postView';
 
 const App = ({ categories }) => (
     <div>
         <Menu categories={categories} />
         <Switch>
             <Route exact path="/" component={PostList} />
-            <Route exact path="/create" component={PostCreate} />
+            <Route exact path="/post/create" component={PostView} />
+            <Route path="/post/:postId" component={PostView} />
             <Route path="/:category" component={PostList} />
         </Switch>
     </div>
@@ -29,4 +30,4 @@ const mapStateToProps = ({ categories }) => ({
     categories,
 });
 
-export default connect(mapStateToProps)(App);
+export default withRouter(connect(mapStateToProps)(App));

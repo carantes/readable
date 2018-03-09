@@ -1,10 +1,8 @@
 import {
     RECEIVE_POSTS,
     ADD_POST,
-    EDIT_POST,
     DELETE_POST,
     UPDATE_POST_VOTE_COUNT,
-    ADD_COMMENT,
 } from '../actions/types';
 
 function posts(state = [], action) {
@@ -12,7 +10,6 @@ function posts(state = [], action) {
         case RECEIVE_POSTS:
             return action.posts;
         case ADD_POST:
-            console.log(action.post);
             return [
                 action.post,
                 ...state,
@@ -25,10 +22,6 @@ function posts(state = [], action) {
                 }
                 return item;
             });
-        case ADD_COMMENT:
-            return [];
-        case EDIT_POST:
-            return [];
         case DELETE_POST:
             return state.map((item) => {
                 if (item.id === action.id) {
