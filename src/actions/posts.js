@@ -1,21 +1,16 @@
 import uuidv1 from 'uuid/v1';
+import { fetchHandler, getEndpoint, getEndpointByCategory } from '../helpers/fetchHandler';
 
 import {
-    API_ENDPOINT,
     REQUEST_POSTS,
     RECEIVE_POSTS,
     UPDATE_POST_VOTE_COUNT,
-    ADD_POST, EDIT_POST,
+    ADD_POST,
+    UPDATE_POST,
     DELETE_POST,
 } from './types';
 
-function getPostListEndpoint(category = '') {
-    return category === '' ? `${API_ENDPOINT}/posts` : `${API_ENDPOINT}/${category}/posts`;
-}
-
-function getPostEndpoint(id = '') {
-    return `${API_ENDPOINT}/posts/${id}`;
-}
+const RESOURCE = 'posts';
 
 function requestPosts(category) {
     return {
@@ -41,77 +36,76 @@ function updatePostVoteCount(id, option) {
     };
 }
 
-export function fetchGetPosts(category) {
-    return (dispatch) => {
-        dispatch(requestPosts(category));
-        return fetch(getPostListEndpoint(category), { method: 'GET', headers: { authorization: 'readable' } })
-            .then(response => response.json())
-            .then(json => dispatch(receivePosts(json)));
-    };
-}
-
-export function addPost(post) {
+function addPost(post) {
     return {
         type: ADD_POST,
         post,
     };
 }
 
-export function editPost({ id, newPost }) {
+function updatePost(post) {
     return {
-        type: EDIT_POST,
-        payload: {
-            id,
-            newPost,
-        },
+        type: UPDATE_POST,
+        post,
     };
 }
 
-export function deletePost(id) {
+function deletePost(id) {
     return {
         type: DELETE_POST,
         id,
     };
 }
 
+export function fetchGetPosts(category) {
+    return (dispatch) => {
+        dispatch(requestPosts(category));
+        const onReceiveposts = posts => dispatch(receivePosts(posts));
+        return fetchHandler(getEndpointByCategory(category, RESOURCE), {}, onReceiveposts);
+    };
+}
+
 export function fetchUpdatePostVotes(postId, option) {
-    const options = { method: 'POST', headers: { authorization: 'readable' }, body: { option } };
-    return dispatch =>
-        fetch(getPostEndpoint(postId), options)
-            .then(response => response.json())
-            .then(json => dispatch(updatePostVoteCount(postId, option)));
+    return (dispatch) => {
+        const onUpdatePostVoteCount = () => dispatch(updatePostVoteCount(postId, option));
+        return fetchHandler(getEndpoint(RESOURCE, postId), { method: 'POST', body: { option } }, onUpdatePostVoteCount);
+    };
 }
 
 export function fetchDeletePost(postId) {
-    const options = { method: 'DELETE', headers: { authorization: 'readable' } };
-    return dispatch =>
-        fetch(getPostEndpoint(postId), options)
-            .then(response => response.json())
-            .then(json => dispatch(deletePost(postId)));
-}
-
-export function fetchGetPost(postId) {
-    return fetch(getPostEndpoint(postId), { method: 'GET', headers: { authorization: 'readable' } })
-        .then(response => response.json());
-}
-
-export function fetchPostPost(post) {
     return (dispatch) => {
-        const body = {
-            id: uuidv1(),
+        const onDeletePost = () => dispatch(deletePost(postId));
+        return fetchHandler(getEndpoint(RESOURCE, postId), { method: 'DELETE' }, onDeletePost);
+    };
+}
+
+export function fetchGetPostById(postId, onReceivePost) {
+    return fetchHandler(getEndpoint(RESOURCE, postId), {}, onReceivePost);
+}
+
+export function fetchInsertPost({ title, body, author, category }) {
+    return (dispatch) => {
+        const id = uuidv1();
+        const payload = {
+            id,
             timestamp: Date.now(),
-            title: post.title,
-            body: post.body,
-            author: post.author,
-            category: post.category,
+            title,
+            body,
+            author,
+            category,
         };
-        const options = {
-            method: 'POST',
-            headers: { authorization: 'readable' },
+        const onInsertPost = () => dispatch(addPost({ id, title, body, author, category }));
+        return fetchHandler(getEndpoint(RESOURCE), { method: 'POST', body: payload }, onInsertPost);
+    };
+}
+
+export function fetchUpdatePost({ postId, title, body }) {
+    return (dispatch) => {
+        const payload = {
+            title,
             body,
         };
-        fetch(getPostEndpoint(), options)
-            .then(response => response.json())
-            .then(json => dispatch(addPost(json)));
+        const onUpdatePost = () => dispatch(updatePost({ id: postId, title, body }));
+        return fetchHandler(getEndpoint(RESOURCE, postId), { method: 'PUT', body: payload }, onUpdatePost);
     };
 }

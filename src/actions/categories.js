@@ -1,8 +1,5 @@
-import { API_ENDPOINT, REQUEST_CATEGORIES, RECEIVE_CATEGORIES } from './types';
-
-function getCategoryEndpoint() {
-    return `${API_ENDPOINT}/categories`;
-}
+import { REQUEST_CATEGORIES, RECEIVE_CATEGORIES } from './types';
+import { fetchHandler, getEndpoint } from '../helpers/fetchHandler';
 
 function requestCategories() {
     return {
@@ -22,8 +19,7 @@ function receiveCategories({ categories }) {
 export default function fetchCategories() {
     return (dispatch) => {
         dispatch(requestCategories());
-        return fetch(getCategoryEndpoint(), { method: 'GET', headers: { authorization: 'readable' } })
-            .then(response => response.json())
-            .then(json => dispatch(receiveCategories(json)));
+        const onReceiveCategories = categories => dispatch(receiveCategories(categories));
+        return fetchHandler(getEndpoint('categories'), {}, onReceiveCategories);
     };
 }

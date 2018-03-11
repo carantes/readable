@@ -2,27 +2,28 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { fetchPostPost, fetchGetPost } from '../../actions/posts';
+import { fetchInsertPost, fetchUpdatePost, fetchGetPostById } from '../../actions/posts';
 
 class PostView extends Component {
     constructor(props) {
         super(props);
+
+        const { postId } = this.props.match.params;
+
         this.state = {
+            postId,
             title: '',
             body: '',
             author: '',
             category: '',
         };
 
+        if (postId) {
+            fetchGetPostById(postId, post => this.setState(post));
+        }
+
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-
-        const { match } = this.props;
-
-        if (match.params.postId) {
-            fetchGetPost(match.params.postId)
-                .then(data => this.setState(data));
-        }
     }
 
     handleInputChange(event) {
@@ -35,14 +36,19 @@ class PostView extends Component {
         this.setState({
             [name]: data,
         });
-
-        console.log(this.state);
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        console.log(this.state);
-        this.props.savePost(this.state);
+        const redirect = this.context.router.history.push('/');
+
+        if (this.state.postId) {
+            this.props.updatePost(this.state)
+                .then(() => redirect);
+        } else {
+            this.props.createPost(this.state)
+                .then(() => redirect);
+        }
     }
 
     render() {
@@ -52,7 +58,7 @@ class PostView extends Component {
                     <div>
                         <label htmlFor="category" className="d-block">
                             Category:
-                            <select value={this.state.category} onChange={this.handleChange}>
+                            <select value={this.state.category} onChange={this.handleChange} readOnly={this.state.postId} >
                                 {this.props.categories.map(category => (
                                     <option key={category.name} value={category.name}>{category.name}</option>
                                 ))}
@@ -65,6 +71,7 @@ class PostView extends Component {
                             <input
                                 name="title"
                                 type="text"
+                                placeholder="Digite o titulo"
                                 value={this.state.title}
                                 onChange={this.handleInputChange}
                             />
@@ -74,8 +81,10 @@ class PostView extends Component {
                         <label htmlFor="body">
                             Body:
                             <textarea
+                                name="body"
                                 value={this.state.body}
-                                onChange={this.handleChange}
+                                placeholder="Digite os detalhes"
+                                onChange={this.handleInputChange}
                             />
                         </label>
                     </div>
@@ -87,6 +96,8 @@ class PostView extends Component {
                                 type="text"
                                 value={this.state.author}
                                 onChange={this.handleInputChange}
+                                placeholder="Digite o nome do Autor"
+                                readOnly={this.state.postId}
                             />
                         </label>
                     </div>
@@ -101,7 +112,8 @@ class PostView extends Component {
 
 PostView.propTypes = {
     match: PropTypes.object, // eslint-disable-line react/forbid-prop-types
-    savePost: PropTypes.func.isRequired,
+    createPost: PropTypes.func.isRequired,
+    updatePost: PropTypes.func.isRequired,
     categories: PropTypes.array, // eslint-disable-line react/forbid-prop-types
 };
 
@@ -111,8 +123,11 @@ PostView.defaultProps = {
 };
 
 const mapDispatchToProps = dispatch => ({
-    savePost(post) {
-        dispatch(fetchPostPost(post));
+    createPost(post) {
+        return dispatch(fetchInsertPost(post));
+    },
+    updatePost(post) {
+        return dispatch(fetchUpdatePost(post));
     },
 });
 
